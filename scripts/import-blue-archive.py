@@ -4,6 +4,9 @@ import hashlib
 import html
 import json
 import re
+import shutil
+import subprocess
+import sys
 import unicodedata
 import urllib.request
 from collections import Counter
@@ -13,6 +16,27 @@ from concurrent.futures import ThreadPoolExecutor
 from vocabulary import deduplicate, prepare_pack, write_atomic, json_bytes
 
 ROOT = Path(__file__).resolve().parents[1]
+
+
+def download_json(url):
+    # Bound the whole transfer; urllib's per-read timeout can leave a download hanging.
+    executable = shutil.which('curl.exe' if sys.platform == 'win32' else 'curl')
+    if executable:
+        result = subprocess.run([
+            executable, '--fail', '--silent', '--show-error', '--location', '--compressed',
+            '--connect-timeout', '10', '--max-time', '180',
+            '--user-agent', 'bluemantle-data-import/0.1', url,
+        ], capture_output=True, timeout=190,
+            creationflags=subprocess.CREATE_NO_WINDOW if sys.platform == 'win32' else 0)
+        if result.returncode:
+            raise RuntimeError(f"Download failed: {url}: {result.stderr.decode('utf-8', errors='replace').strip()}")
+        raw = result.stdout
+    else:
+        request = urllib.request.Request(url, headers={'User-Agent': 'bluemantle-data-import/0.1'})
+        with urllib.request.urlopen(request, timeout=30) as response:
+            raw = response.read()
+    json.loads(raw)
+    return raw
 
 
 def normalize(value):
@@ -47,11 +71,10 @@ def main():
         if not args.offline or not target.exists():
             if args.offline:
                 raise SystemExit(f"Missing offline source: {target}")
-            request = urllib.request.Request(url, headers={"User-Agent": "bluemantle-data-import/0.1"})
-            with urllib.request.urlopen(request, timeout=60) as response:
-                raw = response.read()
-                json.loads(raw)
-                write_atomic(target, raw)
+            print(f"Fetching {name}...", flush=True)
+            raw = download_json(url)
+            write_atomic(target, raw)
+            print(f"Fetched {name}: {len(raw):,} bytes", flush=True)
         raw = target.read_bytes()
         sources.append({"id": f"schaledb:{name}", "url": url, "sha256": hashlib.sha256(raw).hexdigest(), "retrievedAt": datetime.fromtimestamp(target.stat().st_mtime, timezone.utc).isoformat()})
         return json.loads(raw)

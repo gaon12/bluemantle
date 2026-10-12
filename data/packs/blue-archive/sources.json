@@ -10,31 +10,31 @@
       "id": "schaledb:equipment",
       "url": "https://schaledb.com/data/kr/equipment.min.json",
       "sha256": "e7fc0fc7369d6000697cb662584732bb59185afa9e525e4f9d0c2018a326a04e",
-      "retrievedAt": "2026-10-12T09:05:21.791887+00:00"
+      "retrievedAt": "2026-10-12T11:10:52.812266+00:00"
     },
     {
       "id": "schaledb:furniture",
       "url": "https://schaledb.com/data/kr/furniture.min.json",
       "sha256": "a991cf060dafd831c2f91bfe7a4782561b1321cfd661a4dfe969906fd7a6ae7b",
-      "retrievedAt": "2026-10-12T09:05:52.225959+00:00"
+      "retrievedAt": "2026-10-12T11:10:57.111762+00:00"
     },
     {
       "id": "schaledb:items",
       "url": "https://schaledb.com/data/kr/items.min.json",
       "sha256": "2148ff1e267b7ad7855ace88b38c555004ff292a892b6849b707da953544304f",
-      "retrievedAt": "2026-10-12T09:06:09.291709+00:00"
+      "retrievedAt": "2026-10-12T11:11:00.933357+00:00"
     },
     {
       "id": "schaledb:localization",
       "url": "https://schaledb.com/data/kr/localization.min.json",
       "sha256": "becfa26083d38cf0e258cdfda758112dfcd5a101477ee7eb055e63b08724a7db",
-      "retrievedAt": "2026-10-12T09:05:15.506121+00:00"
+      "retrievedAt": "2026-10-12T11:10:52.819131+00:00"
     },
     {
       "id": "schaledb:students",
       "url": "https://schaledb.com/data/kr/students.min.json",
       "sha256": "b564aba188fee32d7ce15c6db0109c99ddf684706812f76445db34309591482b",
-      "retrievedAt": "2026-10-12T09:06:39.269249+00:00"
+      "retrievedAt": "2026-10-12T11:11:08.462707+00:00"
     },
     {
       "id": "bluemantle-editorial",
