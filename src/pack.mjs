@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto';
 import { readFile, readdir, realpath } from 'node:fs/promises';
 import path from 'node:path';
+import { SemanticSpace } from './geometry.mjs';
 
 export const sha256 = (value) => createHash('sha256').update(value).digest('hex');
 export const normalize = (value) => value.normalize('NFKC').toLowerCase().replace(/[\s·・._-]+/gu, '');
@@ -55,6 +56,7 @@ export class TopicPack {
       for (let j = 0; j < this.dimensions; j++) vectors[index * this.dimensions + j] /= norm;
     });
     requireValue(this.answerIndices.length >= 2, 'A pack needs at least two answer-eligible terms');
+    this.geometry = new SemanticSpace(vectors, this.dimensions);
   }
 
   resolve(word) { return this.byName.get(normalize(word)); }

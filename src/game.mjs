@@ -1,5 +1,6 @@
 import { createHmac, randomBytes, timingSafeEqual } from 'node:crypto';
 import { sha256 } from './pack.mjs';
+import { MAX_CONNECTION_WORDS, SCORING_VERSION } from './geometry.mjs';
 
 export class GameError extends Error {
   constructor(code, message, status = 400) { super(message); this.code = code; this.status = status; }
@@ -41,9 +42,7 @@ export class Puzzle {
     this.scores = new Float64Array(pack.terms.length);
     const order = [];
     for (let i = 0; i < pack.terms.length; i++) {
-      let score = 0;
-      for (let j = 0; j < pack.dimensions; j++) score += pack.vectors[i * pack.dimensions + j] * pack.vectors[answerIndex * pack.dimensions + j];
-      this.scores[i] = Math.max(-1, Math.min(1, score));
+      this.scores[i] = pack.geometry.cosine(i, answerIndex);
       order.push(i);
     }
     order.sort((a, b) => {
@@ -70,6 +69,14 @@ export class Puzzle {
     const index = this.pack.resolve(word);
     if (index === undefined) throw new GameError('UNKNOWN_WORD', '아직 사전에 없는 단어예요. 다른 표기나 단어를 시도해 보세요.', 422);
     return this.result(index);
+  }
+
+  connections(ids) {
+    if (!Array.isArray(ids) || ids.length > MAX_CONNECTION_WORDS || new Set(ids).size !== ids.length || ids.some(id => typeof id !== 'string' || !this.pack.byId.has(id))) throw new GameError('INVALID_CONNECTIONS', `서로 다른 등록 용어 ${MAX_CONNECTION_WORDS}개까지 비교할 수 있어요.`);
+    const indices = ids.map(id => this.pack.byId.get(id));
+    // Only relations between requested guesses; no target, category axes or vectors.
+    const similarities = indices.map(a => indices.map(b => Math.round(this.pack.geometry.cosine(a, b) * 10000) / 100));
+    return { ids, similarities };
   }
 
   hint(guessedIds) {
@@ -105,7 +112,7 @@ export class GameService {
     if (!pack) throw new GameError('UNKNOWN_PACK', '선택한 주제를 사용할 수 없습니다.', 404);
     if (!['daily', 'practice'].includes(mode)) throw new GameError('INVALID_MODE', '올바르지 않은 게임 모드입니다.');
     const date = dateInTimezone(this.clock(), pack.manifest.timezone);
-    const payload = { packId, fingerprint: pack.fingerprint, mode, date, nonce: mode === 'daily' ? '' : randomBytes(12).toString('hex') };
+    const payload = { packId, fingerprint: pack.fingerprint, scoringVersion: SCORING_VERSION, mode, date, nonce: mode === 'daily' ? '' : randomBytes(12).toString('hex') };
     const body = Buffer.from(JSON.stringify(payload)).toString('base64url');
     return this.describe(`${body}.${hmac(this.secret, body)}`);
   }
@@ -121,6 +128,7 @@ export class GameService {
     catch { throw new GameError('INVALID_GAME', '게임을 다시 시작해 주세요.', 401); }
     const pack = this.packs.get(payload.packId);
     if (!pack || payload.fingerprint !== pack.fingerprint) throw new GameError('PACK_CHANGED', '주제 데이터가 업데이트되었어요. 새 게임을 시작해 주세요.', 409);
+    if (payload.scoringVersion !== SCORING_VERSION) throw new GameError('RULES_CHANGED', '점수 계산 방식이 업데이트되었어요. 새 게임을 시작해 주세요.', 409);
     if (!['daily', 'practice'].includes(payload.mode) || !/^\d{4}-\d{2}-\d{2}$/.test(payload.date) || (payload.mode === 'daily' ? payload.nonce !== '' : !/^[0-9a-f]{24}$/.test(payload.nonce))) throw new GameError('INVALID_GAME', '게임을 다시 시작해 주세요.', 401);
     if (payload.mode === 'daily' && payload.date !== dateInTimezone(this.clock(), pack.manifest.timezone)) throw new GameError('DAY_CHANGED', '새로운 하루의 문제가 열렸어요. 오늘의 문제를 시작해 주세요.', 409);
     const key = sha256(token);
@@ -136,6 +144,7 @@ export class GameService {
   describe(token) {
     const { payload, pack, puzzleId } = this.resolve(token);
     return { token, puzzleId, pack: pack.publicInfo(), mode: payload.mode, date: payload.date,
+      scoring: { version: SCORING_VERSION, method: 'corpus-centered-cosine', minimum: -100, maximum: 100 },
       endsAt: payload.mode === 'daily' ? nextMidnight(this.clock(), pack.manifest.timezone) : null,
       serverTime: this.clock().toISOString() };
   }

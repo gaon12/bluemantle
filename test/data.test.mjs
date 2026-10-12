@@ -26,7 +26,17 @@ test('real Blue Archive and coffee embeddings load in the same engine', async ()
   // A domain-specific smoke check detects wrong models, row mappings, or missing context.
   const arona = new Puzzle(archive, archive.resolve('아로나'));
   assert.ok(arona.guess('싯딤의 상자').rank <= 20);
+  assert.ok(arona.guess('싯딤의 상자').similarity > 50);
+  assert.ok(Math.abs(arona.guess('청휘석').similarity) < 15);
   const currency = new Puzzle(archive, archive.resolve('청휘석'));
   assert.ok(currency.guess('모집').rank <= 20);
-
+  assert.ok(currency.guess('모집').similarity > 50);
+  const skill = new Puzzle(archive, archive.resolve('사라져주세요사라져주세요!'));
+  assert.ok(skill.guess('에리카').similarity < 10);
+  // Fixed sampling catches a return to inflated raw domain scores.
+  let seed = 42;
+  const next = () => { seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0; return Math.floor(seed / 4294967296 * archive.terms.length); };
+  const randomScores = Array.from({ length: 2000 }, () => archive.geometry.cosine(next(), next()) * 100).sort((a, b) => a - b);
+  assert.ok(Math.abs(randomScores[1000]) < 10);
+  assert.ok(randomScores[1980] < 60);
 });

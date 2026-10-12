@@ -49,13 +49,14 @@ export function createApp(service, unavailable = [], staticRoot = path.join(ROOT
       const url = new URL(request.url, 'http://localhost');
       if (request.method === 'GET' && url.pathname === '/api/packs') return send(200, { packs: [...service.packs.values()].map(pack => pack.publicInfo()).concat(unavailable) });
       if (request.method === 'GET' && url.pathname === '/api/health') return send(service.packs.size ? 200 : 503, { ready: service.packs.size > 0, packs: service.packs.size });
-      if (request.method === 'POST' && ['/api/games', '/api/guess', '/api/hint', '/api/reveal', '/api/restore'].includes(url.pathname)) {
+      if (request.method === 'POST' && ['/api/games', '/api/guess', '/api/hint', '/api/reveal', '/api/restore', '/api/connections'].includes(url.pathname)) {
         const body = await readBody(request);
         if (url.pathname === '/api/games') return send(200, service.open(body.packId, body.mode));
         const { puzzle } = service.resolve(body.token);
         if (url.pathname === '/api/guess') return send(200, puzzle.guess(body.word));
         if (url.pathname === '/api/hint') return send(200, puzzle.hint(body.guessedIds));
         if (url.pathname === '/api/reveal') return send(200, puzzle.reveal());
+        if (url.pathname === '/api/connections') return send(200, puzzle.connections(body.ids));
         if (!Array.isArray(body.guesses) || body.guesses.length > puzzle.pack.terms.length || body.guesses.some(g => !g || typeof g.id !== 'string' || typeof g.hint !== 'boolean' || !puzzle.pack.byId.has(g.id))) throw new GameError('INVALID_HISTORY', '저장된 기록이 올바르지 않습니다.');
         const unique = new Map(body.guesses.map(guess => [guess.id, puzzle.result(puzzle.pack.byId.get(guess.id), guess.hint)]));
         return send(200, { game: service.describe(body.token), guesses: [...unique.values()] });

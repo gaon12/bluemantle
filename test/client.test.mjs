@@ -55,3 +55,40 @@ test('client countdown expires exactly at the server midnight, never one second 
   now = Date.parse('2026-10-12T15:00:00.000Z'); store.tick();
   assert.equal(store.getSnapshot().expired, true);
 });
+
+test('connection failures keep accepted guesses and can be retried without another attempt', async () => {
+  let fail = true;
+  const store = new GameStore(async (route, body) => {
+    if (route === '/api/games') return game();
+    if (route === '/api/connections') {
+      if (fail) throw new Error('map network failure');
+      return { ids: body.ids, similarities: [[100, 0], [0, 100]] };
+    }
+    return { id: body.word, word: body.word, rank: 20, similarity: 5, hint: false, correct: false };
+  }, memory());
+  await store.begin('topic');
+  await store.submit('one'); await store.submit('two');
+  assert.equal(store.getSnapshot().guesses.length, 2);
+  assert.equal(store.getSnapshot().connectionsError, true);
+  fail = false; await store.loadConnections();
+  assert.deepEqual(store.getSnapshot().connections.ids, ['one', 'two']);
+  assert.equal(store.getSnapshot().connectionsError, false);
+  assert.equal(store.getSnapshot().guesses.length, 2);
+});
+
+test('a late connection response cannot replace the map of another puzzle', async () => {
+  let resolveMap;
+  const store = new GameStore(async (route, body) => {
+    if (route === '/api/games') return game(body.packId);
+    if (route === '/api/connections') return new Promise(resolve => { resolveMap = resolve; });
+    return { id: body.word, word: body.word, rank: 20, similarity: 5, hint: false, correct: false };
+  }, memory());
+  await store.begin('first'); await store.submit('one');
+  const pending = store.submit('two');
+  await new Promise(resolve => setImmediate(resolve));
+  await store.begin('second');
+  resolveMap({ ids: ['one', 'two'], similarities: [[100, 0], [0, 100]] }); await pending;
+  assert.equal(store.getSnapshot().game.pack.id, 'second');
+  assert.equal(store.getSnapshot().guesses.length, 0);
+  assert.equal(store.getSnapshot().connections, null);
+});

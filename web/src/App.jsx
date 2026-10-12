@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import { gameStore, isFinished } from '../game-store.mjs';
+import ExplorationMap from './ExplorationMap.jsx';
 
 const iconPaths = {
   home: 'M3 10 12 3l9 7M5 9v11h5v-6h4v6h5V9',
@@ -40,7 +41,7 @@ function History({ guesses, sort }) {
     {rows.length ? <div className="table-scroll"><table><caption className="sr-only">추측한 단어와 유사도, 가까운 순위</caption><thead><tr><th>시도</th><th>단어</th><th>유사도</th><th>가까운 순위</th></tr></thead><tbody>{rows.map(guess => <tr key={guess.id} className={guess.correct ? 'correct-row' : guess.attempt === guesses.length ? 'latest-row' : ''}>
       <td className="attempt-cell">{String(guess.attempt).padStart(2, '0')}</td>
       <td className="word-cell">{guess.word}{guess.hint && <span className="hint-badge">힌트</span>}</td>
-      <td><div className={`similarity ${guess.rank <= 10 ? 'hot' : guess.rank <= 100 ? 'warm' : ''}`}><strong>{guess.similarity.toFixed(2)}</strong><span className="similarity-track" aria-hidden="true"><span style={{ width: `${Math.max(0, guess.similarity)}%` }} /></span></div></td>
+      <td><div className={`similarity ${guess.rank <= 10 ? 'hot' : guess.rank <= 100 ? 'warm' : ''}`}><strong>{guess.similarity.toFixed(2)}</strong><span className="similarity-track" aria-hidden="true"><span style={{ left: `${guess.similarity < 0 ? 50 + guess.similarity / 2 : 50}%`, width: `${Math.abs(guess.similarity) / 2}%` }} /></span></div></td>
       <td className="rank-cell">{guess.correct && <Icon name="check" size={13} />}{guess.rank.toLocaleString('ko-KR')}<small>위</small></td>
     </tr>)}</tbody></table></div> : <div className="empty-history"><div className="empty-halo"><Icon name="spark" size={34} /></div><h3>첫 번째 연결을 기다리고 있어요.</h3><p>아는 단어에서 시작해, 새로운 연결을 찾아보세요.</p><span className="empty-dots" aria-hidden="true">· · ·</span></div>}
   </section>;
@@ -95,6 +96,7 @@ export default function App() {
             {answer && <div className="result-panel"><div className="result-top"><Icon name={state.gaveUp ? 'book' : 'check'} size={20} /><span>{state.gaveUp ? 'CONNECTION REVEALED' : 'MISSION COMPLETE'}</span></div><h2>{answer.word}{!state.gaveUp && <span>, 찾았어요!</span>}</h2><p>{answer.description}</p><div className="result-actions"><button className="action-button primary" onClick={share}>결과 공유하기<Icon name="arrow" size={17} /></button><button className="action-button secondary" disabled={busy} onClick={() => gameStore.begin(pack.id, 'practice', true)}>{mode === 'daily' ? '연습 문제 풀기' : '다른 문제 풀기'}</button></div></div>}
             {guesses.length === 0 && !finished && pack?.examples.length > 0 && <div className="starter-words"><span>이런 단어로 시작해 보세요</span>{pack.examples.map(word => <button key={word} type="button" disabled={disabled} onClick={() => { setGuess(word); input.current?.focus(); }}>{word}<span>+</span></button>)}</div>}
             <History guesses={guesses} sort={state.sort} />
+            <ExplorationMap key={game?.puzzleId} guesses={guesses} connections={state.connections} error={state.connectionsError} />
             <div className="panel-actions"><button type="button" className="action-button hint-button" disabled={disabled} onClick={() => gameStore.hint()}><Icon name="spark" size={17} />가까운 단어 힌트{guesses.some(g => g.hint) && <span className="hint-count">{guesses.filter(g => g.hint).length}</span>}</button><button type="button" className="plain-button reveal-button" disabled={disabled} onClick={() => setRevealOpen(true)}>정답 확인<span aria-hidden="true">›</span></button></div>
           </div>
         </section>
@@ -102,13 +104,13 @@ export default function App() {
 
       <aside className="support-column">
         <div className="assistant-card"><div className="assistant-heading"><span className="assistant-status" /><span>CONNECTION GUIDE</span><Icon name="spark" size={16} /></div><div className="assistant-art" aria-hidden="true"><div className="assistant-orbit" /><HaloMark /><div className="art-lines" /><span className="art-cross">✦</span><span className="art-coordinate">NO LIMIT TO CONNECTIONS.</span></div><div className="speech-box"><strong>선생님, 준비되셨나요?</strong><p>단어와 단어 사이에 숨어 있는<br />연결을 함께 찾아봐요!</p></div></div>
-        <section className="guide-panel"><div className="section-heading"><h2><span className="small-square" />작전 안내</h2><span className="guide-number">01</span></div><ol><li><span>1</span><div><strong>단어를 추측해요</strong><p>이름, 장소, 사물, 개념까지.<br />주제에 속한 단어를 입력하세요.</p></div></li><li><span>2</span><div><strong>유사도와 순위를 확인해요</strong><p>유사도가 높고 순위가 낮을수록<br />정답과 의미가 가까워요.</p></div></li><li><span>3</span><div><strong>새로운 연결을 찾아요</strong><p>가까운 단어에서 연상을 이어가면<br />정답에 다가갈 수 있어요.</p></div></li></ol></section>
+        <section className="guide-panel"><div className="section-heading"><h2><span className="small-square" />작전 안내</h2><span className="guide-number">01</span></div><ol><li><span>1</span><div><strong>단어를 추측해요</strong><p>이름, 장소, 사물, 개념까지.<br />주제에 속한 단어를 입력하세요.</p></div></li><li><span>2</span><div><strong>유사도와 순위를 확인해요</strong><p>공통 성분을 보정한 점수예요.<br />높은 점수, 낮은 순위를 찾아요.</p></div></li><li><span>3</span><div><strong>탐색 방향을 비교해요</strong><p>같은 점수라도 연결은 달라요.<br />지도에서 추측끼리 비교해 보세요.</p></div></li></ol></section>
         <section className="world-panel"><div className="section-heading"><h2><span className="small-square" />{pack?.name ?? '오늘의 세계'}</h2><Icon name="layers" size={17} /></div><div className="category-tags">{pack && Object.entries(pack.categories).filter(([id]) => pack.categoryCounts[id]).map(([id, label]) => <span key={id}>{label}</span>)}</div><p>매일 같은 문제를 함께 풀어요.<br />나만의 연결을 발견해 보세요.</p></section>
       </aside>
     </main>
     <footer><span><span className="footer-dot" />ALL CONNECTIONS ARE POSSIBLE.</span><small>Bluemantle · Inspired by Semantle</small></footer>
 
-    <Modal open={helpOpen} onClose={() => setHelpOpen(false)} eyebrow="OPERATION GUIDE" title="의미로 찾는 오늘의 단어"><p>숨겨진 정답 하나를 찾는 게임이에요. 단어를 입력하면 정답과의 유사도와 사전 안에서의 순위를 알려줘요.</p><p><strong>유사도</strong>는 −100부터 100 사이의 의미적 가까움이에요. 확률을 뜻하지 않아요. <strong>순위</strong>는 낮을수록 가깝고, 정답은 1위예요.</p><p>등록된 별명과 띄어쓰기 변형도 사용할 수 있어요. 힌트는 지금까지의 추측보다 가까운 단어를 보여줘요.</p><p>오늘의 문제는 주제의 시간대 자정에 바뀌어요. 기록은 이 브라우저에 저장되고 주제와 모드마다 따로 이어서 풀 수 있어요.</p><button className="action-button primary" onClick={() => setHelpOpen(false)}>작전 시작<Icon name="arrow" size={18} /></button></Modal>
+    <Modal open={helpOpen} onClose={() => setHelpOpen(false)} eyebrow="OPERATION GUIDE" title="의미로 찾는 오늘의 단어"><p>숨겨진 정답 하나를 찾는 게임이에요. 단어를 입력하면 정답과의 유사도와 사전 안에서의 순위를 알려줘요.</p><p><strong>유사도</strong>는 사전 전체에 공통적인 성분을 보정한 −100~100점이에요. 0 근처는 보정 후 겹치는 성분이 적다는 뜻이고, 음수가 반의어를 뜻하지는 않아요. 확률도 아니에요. 정확한 정답만 100점·1위로 인정해요.</p><p><strong>탐색 지도</strong>에서 추측한 단어끼리의 관계를 비교하세요. 같은 정답 점수여도 서로 연결이 약하면 다른 방향의 추측일 수 있어요. 위치는 2차원 근사이며 새 추측에 따라 바뀌어요. 정답 위치는 표시하지 않아요.</p><p>등록된 별명과 띄어쓰기 변형도 사용할 수 있어요. 힌트는 지금까지의 추측보다 가까운 단어를 보여줘요.</p><p>오늘의 문제는 주제의 시간대 자정에 바뀌어요. 기록은 이 브라우저에 저장되고 주제와 모드마다 따로 이어서 풀 수 있어요.</p><button className="action-button primary" onClick={() => setHelpOpen(false)}>작전 시작<Icon name="arrow" size={18} /></button></Modal>
     <Modal open={revealOpen} onClose={() => setRevealOpen(false)} eyebrow="REVEAL CONNECTION" title="정답을 확인할까요?"><p>이번 문제를 마치고 정답과 설명을 볼 수 있어요.</p><div className="modal-actions"><button className="action-button secondary" onClick={() => setRevealOpen(false)}>계속 풀기</button><button className="action-button primary" onClick={() => { setRevealOpen(false); gameStore.reveal(); }}>정답 확인하기<Icon name="arrow" size={18} /></button></div></Modal>
   </div>;
 }

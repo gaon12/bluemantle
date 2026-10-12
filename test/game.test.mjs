@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { dailyAnswer, dateInTimezone, nextMidnight, Puzzle, GameService } from '../src/game.mjs';
 import { normalize } from '../src/pack.mjs';
+import { SemanticSpace } from '../src/geometry.mjs';
 import { fixturePack } from './helpers.mjs';
 
 test('Unicode, whitespace and registered aliases resolve to one term', () => {
@@ -16,7 +17,7 @@ test('similarity ranks the whole vocabulary and exact alias matches win', () => 
   const puzzle = new Puzzle(fixturePack(), 0);
   assert.deepEqual(puzzle.guess('APPLE'), { id: 'apple', word: '사과', similarity: 100, rank: 1, correct: true, hint: false });
   assert.equal(puzzle.guess('사과쥬스').rank, 2);
-  assert.equal(puzzle.guess('빵').similarity, 0);
+  assert.ok(puzzle.guess('빵').similarity < 0);
   assert.equal(new Set(puzzle.ranks).size, 4);
   assert.throws(() => puzzle.guess('unknown'), { code: 'UNKNOWN_WORD', status: 422 });
   assert.throws(() => puzzle.guess(''), { code: 'INVALID_GUESS' });
@@ -25,6 +26,7 @@ test('similarity ranks the whole vocabulary and exact alias matches win', () => 
 test('identical vectors do not turn a different word into the answer', () => {
   const pack = fixturePack();
   pack.vectors.set(pack.vectors.slice(0, 3), 3);
+  pack.geometry = new SemanticSpace(pack.vectors, pack.dimensions);
   const puzzle = new Puzzle(pack, 0);
   assert.equal(puzzle.guess('배').correct, false);
   assert.equal(puzzle.guess('배').similarity, 99.99);

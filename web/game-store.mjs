@@ -1,3 +1,5 @@
+import { connectionIds } from './connection-map.mjs';
+
 export async function request(route, data) {
   let response;
   try { response = await fetch(route, { ...(data === undefined ? {} : { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) }), signal: AbortSignal.timeout(15000) }); }
@@ -16,7 +18,7 @@ export const isFinished = state => state.gaveUp || state.guesses.some(guess => g
 export class GameStore {
   constructor(client = request, storage = browserStorage, clock = () => Date.now()) {
     this.client = client; this.storage = storage; this.clock = clock; this.listeners = new Set(); this.revision = 0;
-    this.state = { packs: [], game: null, guesses: [], gaveUp: false, answer: null, busy: true, status: '샬레 네트워크에 연결하고 있어요.', statusKind: '', expired: false, countdown: '—', sort: 'rank', offset: 0, fatal: false };
+    this.state = { packs: [], game: null, guesses: [], connections: null, connectionsError: false, gaveUp: false, answer: null, busy: true, status: '샬레 네트워크에 연결하고 있어요.', statusKind: '', expired: false, countdown: '—', sort: 'rank', offset: 0, fatal: false };
   }
   getSnapshot = () => this.state;
   subscribe = listener => { this.listeners.add(listener); return () => this.listeners.delete(listener); };
@@ -61,21 +63,35 @@ export class GameStore {
       const guesses = restored?.guesses ?? [], gaveUp = !!saved?.gaveUp;
       const answer = gaveUp || guesses.some(g => g.correct) ? await this.client('/api/reveal', { token: game.token }) : null;
       if (revision !== this.revision) return;
-      this.update({ game, guesses, gaveUp, answer, expired: false, fatal: false, offset: Date.parse(game.serverTime) - this.clock(), status: answer ? '저장된 결과를 불러왔어요.' : guesses.length ? '지난 추측에 이어서 연결을 찾아보세요.' : '선생님, 떠오르는 단어로 시작해 볼까요?', statusKind: '' });
+      this.update({ game, guesses, connections: null, connectionsError: false, gaveUp, answer, expired: false, fatal: false, offset: Date.parse(game.serverTime) - this.clock(), status: answer ? '저장된 결과를 불러왔어요.' : guesses.length ? '지난 추측에 이어서 연결을 찾아보세요.' : '선생님, 떠오르는 단어로 시작해 볼까요?', statusKind: '' });
       this.save(); this.tick();
+      await this.loadConnections();
     } catch (error) { if (revision === this.revision) this.update({ fatal: !this.state.game, status: error.message, statusKind: 'error' }); }
     finally { if (revision === this.revision) this.update({ busy: false }); }
   }
   async handleError(error) {
     this.message(error.message, 'error');
     if (error.code === 'DAY_CHANGED') this.update({ expired: true });
-    if (['INVALID_GAME', 'PACK_CHANGED'].includes(error.code) && this.state.game) await this.begin(this.state.game.pack.id, this.state.game.mode, true);
+    if (['INVALID_GAME', 'PACK_CHANGED', 'RULES_CHANGED'].includes(error.code) && this.state.game) await this.begin(this.state.game.pack.id, this.state.game.mode, true);
+  }
+  async loadConnections() {
+    const { game, guesses } = this.state;
+    if (!game || guesses.length < 2) { this.update({ connections: null, connectionsError: false }); return; }
+    const revision = this.revision, ids = connectionIds(guesses);
+    this.update({ connections: null, connectionsError: false });
+    try {
+      const connections = await this.client('/api/connections', { token: game.token, ids });
+      if (revision === this.revision && this.state.guesses === guesses) this.update({ connections });
+    } catch {
+      if (revision === this.revision && this.state.guesses === guesses) this.update({ connectionsError: true });
+    }
   }
   async addGuess(result) {
     if (this.state.guesses.some(g => g.id === result.id)) { this.message('이미 추측한 단어예요. 다른 연결을 떠올려 보세요.'); return false; }
     this.update({ guesses: [...this.state.guesses, result] }); this.save();
     this.message(result.correct ? `${this.state.guesses.length}번의 추측으로 정답을 찾았어요!` : result.hint ? '더 가까운 단어를 찾았어요. 여기서 연결을 이어가 보세요.' : `${result.word} · ${result.rank.toLocaleString('ko-KR')}위. 다음 연결을 찾아보세요.`, result.correct ? 'success' : '');
     if (result.correct) this.update({ answer: await this.client('/api/reveal', { token: this.state.game.token }) });
+    await this.loadConnections();
     return true;
   }
   async submit(word) {

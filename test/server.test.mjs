@@ -52,6 +52,18 @@ test('unknown words, malformed requests and tampered games return structured err
   assert.equal((await post('/api/restore', { token: game.token, guesses: [{ id: 'invented', hint: false }] })).status, 400);
 });
 
+test('HTTP connections return only requested pair relations and reject oversized comparisons', async t => {
+  const { post } = await running(t);
+  const game = await (await post('/api/games', { packId: 'fruit' })).json();
+  const relations = await (await post('/api/connections', { token: game.token, ids: ['apple', 'juice', 'bread'] })).json();
+  assert.deepEqual(relations.ids, ['apple', 'juice', 'bread']);
+  assert.equal(relations.similarities.length, 3);
+  assert.ok(relations.similarities[0][1] > relations.similarities[0][2]);
+  assert.deepEqual(Object.keys(relations).sort(), ['ids', 'similarities']);
+  assert.equal((await post('/api/connections', { token: game.token, ids: Array(33).fill('apple') })).status, 400);
+  assert.equal((await post('/api/connections', { token: 'bad', ids: ['apple'] })).status, 401);
+});
+
 test('static routes never expose vocabulary, vectors, secrets or server source', async t => {
   const { base } = await running(t);
   for (const route of ['/data/packs/fruit/terms.json', '/src/server.mjs', '/.bluemantle/secret', '/manifest.json']) assert.equal((await fetch(base + route)).status, 404);
