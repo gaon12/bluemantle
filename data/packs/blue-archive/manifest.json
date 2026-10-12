@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "id": "blue-archive",
+  "name": "블루 아카이브",
+  "version": "2026-10-12.7a14d32e",
+  "locale": "ko-KR",
+  "timezone": "Asia/Seoul",
+  "description": "학생부터 학원, 동아리, 아이템, 스킬과 세계관 용어까지. 키보토스의 연결을 따라 오늘의 단어를 찾아보세요.",
+  "examples": [
+    "아로나",
+    "밀레니엄",
+    "청휘석"
+  ],
+  "terms": "terms.json",
+  "embeddings": "embeddings.json",
+  "theme": {
+    "accent": "#2563eb"
+  },
+  "categories": {
+    "student": "학생",
+    "school": "학원",
+    "club": "동아리",
+    "item": "아이템",
+    "equipment": "장비",
+    "furniture": "가구",
+    "skill": "스킬",
+    "weapon": "고유무기",
+    "npc": "인물",
+    "place": "장소",
+    "concept": "세계관",
+    "gameplay": "게임 용어",
+    "event": "이벤트"
+  },
+  "embedding": {
+    "model": "google/embeddinggemma-2",
+    "revision": "914f7f89142e33e77833254d9c9b90c3cef7303b",
+    "prompt": "SentenceSimilarity",
+    "dimensions": 768,
+    "inputMode": "name-description"
+  },
+  "vocabulary": "words.txt",
+  "catalog": "catalog.json",
+  "dataAsOf": "2026-10-12"
+}
