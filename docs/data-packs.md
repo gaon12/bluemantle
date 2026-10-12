@@ -1,0 +1,105 @@
+# 데이터 팩과 TXT 사전
+
+게임 엔진은 특정 작품의 용어나 범주에 의존하지 않습니다. `data/packs/<주제>/`에 준비된 팩을 추가하고 서버를 다시 시작하면 화면에서 선택할 수 있습니다.
+
+## 새 주제를 만드는 순서
+
+1. `examples/coffee/`를 `data/packs/<새주제>/`로 복사합니다.
+2. `manifest.json`에서 `id`, `name`, `description`, `examples`, 색상을 수정합니다.
+3. `words.txt`에 단어를 한 줄에 하나씩 입력합니다. 기존 목록을 지우고 새 목록으로 교체해도 됩니다.
+4. `npm run embed -- data/packs/<새주제>`를 실행합니다.
+5. `npm run validate`로 확인한 뒤 서버를 재시작합니다.
+
+이름과 임베딩을 주제 데이터에서 읽으므로 React 화면과 게임 엔진을 수정할 필요가 없습니다.
+
+## words.txt
+
+UTF-8 텍스트이며 한 줄이 하나의 용어입니다. 빈 줄은 무시하고, UTF-8 BOM과 CRLF를 지원합니다. `|`, 쉼표, 탭으로 메타데이터 열을 만들 필요가 없습니다.
+
+```text
+에스프레소
+카페 라테
+우유
+라떼
+그라인더
+```
+
+임베딩을 실행하면 정규화한 중복과 등록된 별명 중복을 제거하고 같은 TXT에 표준 이름을 다시 저장합니다. 위 예시는 카탈로그에 `라떼`가 등록되어 있다면 `카페 라테` 하나로 합칩니다. 새 단어는 첫 표기를 유지합니다.
+
+NFKC 유니코드 정규화, 소문자화, 공백·가운데점·점·밑줄·하이픈 무시를 적용합니다. 괄호와 `+`는 유지합니다. 어떤 별명이 여러 다른 용어를 가리키면 자동으로 임의의 용어를 선택하지 않습니다. 최소 두 개의 고유 용어와 두 개의 출제 가능 용어가 필요하며 각 용어는 1~120자입니다.
+
+```powershell
+npm run embed -- data/packs/my-topic/words.txt
+npm run data:dedupe -- data/packs/my-topic/words.txt
+```
+
+두 번째 명령은 모델 없이 TXT만 정리합니다. 목록이 바뀌면 임베딩을 다시 생성해야 합니다. npm 스크립트는 `.venv`의 Python을 자동으로 선택합니다.
+
+## manifest.json
+
+```json
+{
+  "schemaVersion": 1,
+  "id": "my-topic",
+  "name": "새로운 주제",
+  "version": "1.0.0",
+  "locale": "ko-KR",
+  "timezone": "Asia/Seoul",
+  "description": "이 세계의 연결을 찾아보세요.",
+  "examples": ["첫 번째 예시", "두 번째 예시"],
+  "vocabulary": "words.txt",
+  "catalog": "catalog.json",
+  "terms": "terms.json",
+  "embeddings": "embeddings.json",
+  "theme": { "accent": "#00a8e8" },
+  "categories": { "person": "인물", "place": "장소", "concept": "개념", "misc": "기타 용어" },
+  "embedding": {
+    "model": "google/embeddinggemma-2",
+    "revision": "914f7f89142e33e77833254d9c9b90c3cef7303b",
+    "prompt": "SentenceSimilarity",
+    "dimensions": 768,
+    "inputMode": "name-description",
+    "maxTokens": 512
+  }
+}
+```
+
+`id`는 팩 간에 고유한 영문 소문자·숫자·하이픈 식별자입니다. `categories`는 주제에 맞게 자유롭게 선언합니다. 메타데이터가 없는 새 단어는 `misc`에 자동으로 포함됩니다. 색상은 6자리 hex 값이고, 팩 파일은 해당 폴더 바로 아래에 둡니다.
+
+`dataAsOf`는 수집된 데이터의 기준 날짜를 표시하는 선택 항목입니다. 블루 아카이브 수집기는 실제 원본 수집 날짜로 설정합니다. 내용과 벡터의 해시도 게임 식별에 사용하므로 데이터가 변경되면 이전 게임과 기록은 별도 문제로 처리합니다.
+
+## 선택적인 카탈로그
+
+TXT 편집에 카탈로그는 필수 사항이 아닙니다. 알려진 용어의 설명·범주·별명·출처를 자동으로 제공하고 싶다면 `catalog.json`에 다음 형태의 배열을 둘 수 있습니다.
+
+```json
+[
+  {
+    "id": "stable-term-id",
+    "label": "표준 이름",
+    "aliases": ["별명", "English name"],
+    "category": "concept",
+    "description": "이 주제 안에서의 의미와 다른 용어들과의 관계.",
+    "answer": true,
+    "sources": ["source-reference"]
+  }
+]
+```
+
+블루 아카이브에서는 최신 데이터 수집기가 이 파일을 자동으로 만듭니다. 카탈로그가 갱신되면 이전 생성 파일의 설명보다 최신 정보를 우선합니다. `answer: false`인 단어는 추측과 순위에는 포함하지만 정답으로 뽑지 않습니다.
+
+`terms.json`은 TXT와 메타데이터를 합쳐 생성하는 파일입니다. 임베딩 명령을 실행할 때 자동으로 갱신하므로 보통 직접 편집하지 않습니다.
+
+## 임베딩 처리
+
+`inputMode: name`은 이름만 임베딩합니다. `name-description`은 설명이 있는 용어에 `이름. 설명`을 사용하고, 메타데이터가 없는 새 단어에는 이름만 사용합니다. 별명은 표준 용어에 매핑되므로 별도 벡터로 늘어나지 않습니다.
+
+입력별 캐시를 재사용하여 변경된 단어만 추론합니다. 모델이나 작업 프롬프트가 달라지면 별도 캐시를 사용합니다. 작업이 중단되면 같은 명령으로 이어서 실행할 수 있습니다. 모델 실패 시 임의의 벡터로 대체하지 않습니다.
+
+벡터는 정규화된 little-endian float32의 행 우선 배열이며 크기는 `용어 수 × 차원 수 × 4` 바이트입니다. `embeddings.json`에는 다음 항목이 기록됩니다.
+
+- 모델 ID와 리비전, 프롬프트, 입력 방식, 차원, 문맥 길이
+- TXT·생성 용어 JSON·벡터 파일의 SHA-256
+- 벡터 파일명 및 용어와 동일한 순서의 ID
+
+서버는 각 체크섬, ID 순서, 행렬 크기, 유한한 값과 0이 아닌 벡터를 검사합니다. TXT를 수정한 뒤 벡터를 만들지 않으면 팩을 준비 상태로 인정하지 않습니다. 모델과 Python 환경은 플레이 서버에 필요하지 않습니다.

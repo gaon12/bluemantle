@@ -10,7 +10,10 @@
     "dev": "node scripts/dev.mjs",
     "build": "vite build",
     "test": "node --test test/*.test.mjs",
-    "validate": "node scripts/validate-packs.mjs"
+    "test:data": "node scripts/run-python.mjs -m unittest discover -s tests_python -v",
+    "validate": "node scripts/validate-packs.mjs",
+    "embed": "node scripts/run-python.mjs scripts/build-embeddings.py",
+    "data:dedupe": "node scripts/run-python.mjs scripts/prepare-words.py"
   },
   "dependencies": { "react": "19.3.0", "react-dom": "19.3.0" },
   "devDependencies": { "vite": "8.3.4", "@vitejs/plugin-react": "6.1.2" }
