@@ -4,12 +4,14 @@
   "private": true,
   "type": "module",
   "description": "A topic-independent semantic guessing game with replaceable embedding packs.",
-  "engines": {
-    "node": ">=22"
-  },
+  "engines": { "node": ">=22" },
   "scripts": {
-    "start": "node src/server.mjs",
+    "start": "npm run build && node src/server.mjs",
+    "dev": "node scripts/dev.mjs",
+    "build": "vite build",
     "test": "node --test test/*.test.mjs",
     "validate": "node scripts/validate-packs.mjs"
-  }
+  },
+  "dependencies": { "react": "19.3.0", "react-dom": "19.3.0" },
+  "devDependencies": { "vite": "8.3.4", "@vitejs/plugin-react": "6.1.2" }
 }

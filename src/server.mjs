@@ -71,7 +71,7 @@ export function createApp(service, unavailable = [], staticRoot = path.join(ROOT
           return response.end(contents);
         } catch (error) {
           if (error.code !== 'ENOENT') throw error;
-          return send(asset === 'index.html' ? 503 : 404, { error: { code: asset === 'index.html' ? 'FRONTEND_NOT_BUILT' : 'NOT_FOUND', message: asset === 'index.html' ? 'The web frontend is not available yet.' : '페이지를 찾을 수 없습니다.' } });
+          return send(asset === 'index.html' ? 503 : 404, { error: { code: asset === 'index.html' ? 'FRONTEND_NOT_BUILT' : 'NOT_FOUND', message: asset === 'index.html' ? 'Run npm run build to prepare the React frontend.' : '페이지를 찾을 수 없습니다.' } });
         }
       }
       send(404, { error: { code: 'NOT_FOUND', message: '페이지를 찾을 수 없습니다.' } });
