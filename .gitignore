@@ -1,0 +1,14 @@
+.venv/
+.bluemantle/
+data/cache/
+__pycache__/
+*.pyc
+node_modules/
+dist/
+.env
+*.tmp
+# Superseded embeddings; commit only the artifacts referenced by the current indexes.
+data/packs/blue-archive/vectors-c50945c54607b63f.f32
+data/packs/blue-archive/vectors-a0e85e174afa864d.f32
+data/packs/blue-archive/vectors-ce35ffd18abe6e7f.f32
+examples/coffee/vectors-9a6d68a288bbd8c3.f32

@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "model": "google/embeddinggemma-2",
+  "revision": "914f7f89142e33e77833254d9c9b90c3cef7303b",
+  "prompt": "SentenceSimilarity",
+  "inputMode": "name-description",
+  "maxTokens": 512,
+  "dimensions": 768,
+  "dtype": "float32-le",
+  "termsSha256": "3f2d5380e01c038906256b49c6684548d3f2c54ca2f93f3d94e8dad2e721f2a2",
+  "vocabularySha256": "0f21dd1ed5baa41516003ec5f3a3efaa277713689b110f4ee33c7c63868cebed",
+  "vectorsSha256": "77ad12550fbe5b8fa179a24cc26780eb67383cbd16f26985650e550b46fb43ea",
+  "file": "vectors-77ad12550fbe5b8f.f32",
+  "ids": [
+    "americano",
+    "beans",
+    "cappuccino",
+    "cold-brew",
+    "dripper",
+    "espresso",
+    "filter",
+    "grinder",
+    "latte",
+    "milk",
+    "pour-over",
+    "roasting"
+  ]
+}
