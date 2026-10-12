@@ -110,6 +110,17 @@ def main():
     curated = json.loads((pack / "curated.json").read_text(encoding="utf-8"))
     for term in curated["terms"]:
         add(**term)
+    editorial_sources = [{"id": "bluemantle-editorial", "path": "curated.json", "sha256": hashlib.sha256((pack / 'curated.json').read_bytes()).hexdigest()}]
+    memes_path = pack / 'memes.json'
+    if memes_path.exists():
+        memes = json.loads(memes_path.read_text(encoding='utf-8'))
+        for term in memes['terms']:
+            references = term.get('references', [])
+            if any(reference not in memes.get('references', {}) for reference in references):
+                raise ValueError(f"Unknown meme reference: {term['label']}")
+            add(**{key: value for key, value in term.items() if key != 'references'}, source=memes['source'])
+        editorial_sources.append({"id": memes['source'], "path": 'memes.json', "sha256": hashlib.sha256(memes_path.read_bytes()).hexdigest(), "references": memes.get('references', {})})
+
     school_names = localization["SchoolLong"]
     club_names = localization["Club"]
     for code, label in school_names.items():
@@ -168,7 +179,7 @@ def main():
     manifest_path = pack / "manifest.json"
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     retrieved_date = min(source["retrievedAt"][:10] for source in sources)
-    source_hash = hashlib.sha256(''.join(source["sha256"] for source in sorted(sources, key=lambda s: s["id"])).encode()).hexdigest()[:8]
+    source_hash = hashlib.sha256(''.join(source["sha256"] for source in sorted(sources + editorial_sources, key=lambda s: s["id"])).encode()).hexdigest()[:8]
     manifest.update({"vocabulary": "words.txt", "catalog": "catalog.json", "dataAsOf": retrieved_date, "version": f"{retrieved_date}.{source_hash}"})
     manifest["categories"]["event"] = "이벤트"
     write_atomic(manifest_path, json_bytes(manifest))
@@ -183,7 +194,7 @@ def main():
         "ref": args.ref if args.repository else None,
         "note": "현재 운영 중인 SchaleDB 한국어 데이터를 수집합니다. 기본 학생/아이템 범위는 글로벌 서버 출시 기준이며, 기존 TXT의 직접 추가 용어도 보존합니다.",
         "rights": "Game text and data belong to their respective rights holders. They are not covered by the engine's MIT license.",
-        "sources": sorted(sources, key=lambda s: s["id"]) + [{"id": "bluemantle-editorial", "path": "curated.json"}],
+        "sources": sorted(sources, key=lambda s: s["id"]) + editorial_sources,
     }, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print(json.dumps({"terms": len(prepared), "categories": dict(Counter(t["category"] for t in prepared)), "dataAsOf": retrieved_date, "duplicatesRemoved": report["duplicatesRemoved"]}, ensure_ascii=False))
 

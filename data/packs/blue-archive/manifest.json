@@ -2,14 +2,15 @@
   "schemaVersion": 1,
   "id": "blue-archive",
   "name": "블루 아카이브",
-  "version": "2026-10-12.7a14d32e",
+  "version": "2026-10-12.4fa83a3c",
   "locale": "ko-KR",
   "timezone": "Asia/Seoul",
   "description": "학생부터 학원, 동아리, 아이템, 스킬과 세계관 용어까지. 키보토스의 연결을 따라 오늘의 단어를 찾아보세요.",
   "examples": [
     "아로나",
     "밀레니엄",
-    "청휘석"
+    "청휘석",
+    "몰?루"
   ],
   "terms": "terms.json",
   "embeddings": "embeddings.json",
@@ -29,7 +30,9 @@
     "place": "장소",
     "concept": "세계관",
     "gameplay": "게임 용어",
-    "event": "이벤트"
+    "event": "이벤트",
+    "meme": "밈",
+    "music": "음악"
   },
   "embedding": {
     "model": "google/embeddinggemma-2",

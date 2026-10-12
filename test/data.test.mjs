@@ -15,6 +15,22 @@ test('real Blue Archive and coffee embeddings load in the same engine', async ()
   assert.ok(new Set(archive.terms.map(t => t.category)).size >= 10);
   assert.equal(archive.resolve('시딤의 상자'), archive.resolve('싯딤의 상자'));
   assert.equal(archive.resolve('C&C'), archive.resolve('Cleaning&Clearing'));
+  assert.equal(archive.resolve('몰루'), archive.resolve('몰?루'));
+  assert.equal(archive.resolve('몰？루'), archive.resolve('몰?루'));
+  assert.equal(archive.resolve('Arisu Dance'), archive.resolve('아리스 댄스'));
+  assert.equal(archive.resolve('우헤~'), archive.resolve('우헤'));
+  assert.notEqual(archive.resolve('아!루'), archive.resolve('아루'));
+  assert.equal(archive.terms[archive.resolve('땃쥐')].category, 'meme');
+  assert.ok(archive.terms[archive.resolve('땃쥐')].description.includes('사야'));
+  assert.ok(archive.answerIndices.includes(archive.resolve('몰?루')));
+  const meme = new Puzzle(archive, archive.resolve('몰?루'));
+  assert.equal(meme.guess('몰루').correct, true);
+  assert.equal(meme.guess('몰루').similarity, 100);
+  assert.equal(meme.guess('아로나').correct, false);
+  // Newly added slang should retain its character relationship after corpus centering.
+  for (const [expression, character] of [['땃쥐', '사야'], ['우헤', '호시노'], ['아리스 댄스', '아리스']]) {
+    assert.ok(new Puzzle(archive, archive.resolve(expression)).guess(character).rank <= 20);
+  }
   assert.equal(coffee.resolve('라떼'), coffee.resolve('카페 라테'));
   const service = new GameService(new Map([[archive.manifest.id, archive], [coffee.manifest.id, coffee]]), 'real-pack-test');
   const a = service.open(archive.manifest.id);

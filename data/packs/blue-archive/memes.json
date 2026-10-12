@@ -1,0 +1,106 @@
+{
+  "source": "bluemantle-memes",
+  "note": "밈과 관련 음악을 위한 직접 작성한 설명입니다. 표기 변형은 별명으로 통합하고, 학생 이름과 밈 표현은 별개 용어로 유지합니다. 아래 자료는 표현의 사용과 연결을 확인하기 위한 참고 자료입니다.",
+  "references": {
+    "nexon-emoticons": "https://forum.nexon.com/bluearchive/board_view?bannerBoard=1&thread=2157816",
+    "shrew-nickname": "https://namu.moe/w/%EB%95%83%EC%A5%90",
+    "alice-dance": "https://knowyourmeme.com/memes/alice-dance",
+    "panpakapan": "https://www.reddit.com/r/BlueArchive/comments/174jmt8",
+    "oh-my-gotto": "https://knowyourmeme.com/memes/oh-my-gotto",
+    "hoshino-ojisan": "https://www.reddit.com/r/BlueArchive/comments/11sfng1",
+    "hoshino-uhe": "https://www.reddit.com/r/BlueArchive/comments/1uy8otx/dreaming_ojisan_hoshino_by_me/",
+    "mika-gorilla": "https://www.reddit.com/r/BlueArchive/comments/156q3de",
+    "shiroko-bank": "https://www.youtube.com/watch?v=G3aXH_IVJ-o",
+    "fan-remixes": "https://gall.dcinside.com/mgallery/board/view/?id=projectmx&no=4548087",
+    "azusa-fan-project": "https://tumblbug.com/azusa/community/review",
+    "hifumi-theme": "https://zdnet.co.kr/view/?no=20241123203539",
+    "unwelcome-school": "https://www.youtube.com/watch?v=eMqWJDP28p8"
+  },
+  "terms": [
+    {
+      "label": "몰?루", "category": "meme", "aliases": ["몰루", "몰?루!", "모루"],
+      "description": "아로나의 어리둥절한 표정으로 모른다는 반응을 표현하는 말. 몰루콘과 아!루 이모티콘에 연결된다.",
+      "references": ["nexon-emoticons"]
+    },
+    {
+      "label": "아!루", "category": "meme", "aliases": ["아!루!", "아! 루"],
+      "description": "아루의 놀라거나 깨닫는 표정으로 반응을 표현하는 말. 흥신소 68의 아루와 몰?루 이모티콘에 연결된다.",
+      "references": ["nexon-emoticons"]
+    },
+    {
+      "label": "몰루콘", "category": "meme", "aliases": ["몰?루콘", "몰루 콘"],
+      "description": "아로나 등 등장인물을 간단한 그림으로 표현한 이모티콘. 몰?루처럼 짧은 말과 표정으로 대화에 반응한다.",
+      "references": ["nexon-emoticons"]
+    },
+    {
+      "label": "땃쥐", "category": "meme", "aliases": ["땃쥐 사야"],
+      "description": "사야의 쥐 모티브를 빗대어 부르는 팬덤 별명. 산해경의 연금술사 사야와 쥐의 모습에 연결된다.",
+      "references": ["shrew-nickname"]
+    },
+    {
+      "label": "아리스 댄스", "category": "meme", "aliases": ["아리스댄스", "아리스 춤", "Aris Dance", "Arisu Dance", "Alice Dance"],
+      "description": "작게 그린 아리스가 Usagi Flap 음악에 맞춰 춤추는 반복 애니메이션. 게임개발부 아리스의 팬 영상과 리믹스에 연결된다.",
+      "references": ["alice-dance"]
+    },
+    {
+      "label": "빵빠밤", "category": "meme", "aliases": ["빰빠밤", "팡파카팡", "Panpakapan", "Pan Paka Pan"],
+      "description": "아리스가 게임 속 용사처럼 레벨이 올랐을 때 내는 축하 효과음. 게임개발부, 용사와 레벨 업에 연결된다.",
+      "references": ["panpakapan"]
+    },
+    {
+      "label": "오마이갓또", "category": "meme", "aliases": ["오마이갓토", "Oh My Gotto"],
+      "description": "모모이와 아리스의 작은 캐릭터 그림이 놀라는 말을 한 뒤 노래에 맞춰 춤추는 팬 영상 형식.",
+      "references": ["oh-my-gotto"]
+    },
+    {
+      "label": "우헤", "category": "meme", "aliases": ["우헤~", "우헤헤", "Uhe"],
+      "description": "호시노의 느긋하고 늘어지는 웃음소리를 흉내 내는 표현. 낮잠을 좋아하는 아비도스 호시노와 아저씨 말투에 연결된다.",
+      "references": ["hoshino-uhe"]
+    },
+    {
+      "label": "호시노 아저씨", "category": "meme", "aliases": ["아저씨", "오지상", "Ojisan"],
+      "description": "자신을 아저씨라고 부르는 호시노의 말투를 따라 하는 표현. 아비도스 대책위원회의 호시노, 우헤와 느긋한 태도에 연결된다.",
+      "references": ["hoshino-ojisan"]
+    },
+    {
+      "label": "고릴라", "category": "meme", "aliases": ["미카 고릴라"],
+      "description": "미카의 강한 힘과 전투력을 동물에 빗대는 팬덤 별명. 트리니티 티파티의 미카와 에덴조약 이야기에 연결된다.",
+      "references": ["mika-gorilla"]
+    },
+    {
+      "label": "은행을 털자", "category": "meme", "aliases": ["은행털이", "은행 강도", "은행을털자!", "은행을 털자!"],
+      "description": "시로코가 은행을 털자는 제안을 하는 장면을 빗대는 표현. 아비도스 대책위원회, 복면과 블랙마켓에 연결된다.",
+      "references": ["shiroko-bank"]
+    },
+    {
+      "label": "이즈나콩", "category": "meme", "aliases": ["이즈나 콩", "이즈나콩콩"],
+      "description": "이즈나의 귀여운 움직임과 목소리를 반복해서 보여주는 팬 영상과 리믹스. 백귀야행의 닌자 이즈나와 닌자술에 연결된다.",
+      "references": ["fan-remixes"]
+    },
+    {
+      "label": "찌그러진 수시노", "category": "meme", "aliases": ["찌그러진수시노", "찌그러진 수영복 호시노"],
+      "description": "수영복 호시노를 납작하거나 찌그러진 모습으로 그린 팬 그림과 리믹스. 호시노(수영복)의 여름 휴가와 느긋한 목소리에 연결된다.",
+      "references": ["fan-remixes"]
+    },
+    {
+      "label": "마따끄", "category": "meme", "aliases": ["마따끄!", "마따쿠", "Matakku"],
+      "description": "정말이지 하고 투덜거리는 일본어 말투를 흉내 내는 표현. 아즈사 같은 학생의 못마땅한 표정을 그리는 팬 그림에 쓰인다.",
+      "references": ["azusa-fan-project"]
+    },
+    {
+      "label": "히후미 다이스키", "category": "music", "aliases": ["히후미다이스키", "Hifumi Daisuki"],
+      "description": "히후미의 테마 음악. 트리니티 보충수업부의 히후미와 페로로를 떠올리게 하는 밝은 곡으로 팬 리믹스에도 쓰인다.",
+      "references": ["hifumi-theme", "fan-remixes"]
+    },
+    {
+      "label": "Unwelcome School", "category": "music", "aliases": ["언웰컴 스쿨", "언웰컴스쿨", "그 브금"],
+      "description": "아루와 흥신소 68의 소동을 떠올리게 하는 Mitsukiyo의 음악. 시로코의 은행 털이 장면 등 웃긴 상황을 편집한 영상에 쓰인다.",
+      "references": ["unwelcome-school", "shiroko-bank"]
+    },
+    {
+      "label": "Usagi Flap", "category": "music", "aliases": ["우사기 플랩", "우사기플랩"],
+      "description": "래빗 소대의 이야기와 연결되는 경쾌한 음악. 아리스가 춤추는 팬 애니메이션의 배경 음악으로도 쓰인다.",
+      "references": ["alice-dance"]
+    }
+  ]
+}

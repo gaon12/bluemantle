@@ -26,6 +26,17 @@ class VocabularyTests(unittest.TestCase):
         words, _, _ = deduplicate("시로코\n시로코(수영복)\n시로코(라이딩)\n스킬\n스킬+")
         self.assertEqual(len(words), 5)
 
+    def test_meme_spelling_aliases_deduplicate_without_collapsing_student_names(self):
+        catalog = [
+            {"id": "meme-molu", "label": "몰?루", "aliases": ["몰루", "몰?루!"], "category": "meme"},
+            {"id": "meme-aru", "label": "아!루", "aliases": ["아!루!"], "category": "meme"},
+            {"id": "student-aru", "label": "아루", "aliases": [], "category": "student"},
+        ]
+        words, terms, report = deduplicate('몰루\n몰？루\n몰?루!\n아!루\n아！루!\n아루', catalog)
+        self.assertEqual(words, ['몰?루', '아!루', '아루'])
+        self.assertEqual(report['duplicatesRemoved'], 3)
+        self.assertEqual(len({term['id'] for term in terms}), 3)
+
     def test_ambiguous_alias_does_not_select_an_arbitrary_owner(self):
         catalog = [
             {"id": "a", "label": "첫 학생", "aliases": ["학생"]},

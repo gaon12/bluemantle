@@ -26491,6 +26491,248 @@
     ]
   },
   {
+    "id": "meme-041febf898894417",
+    "label": "땃쥐",
+    "category": "meme",
+    "aliases": [
+      "땃쥐 사야"
+    ],
+    "description": "사야의 쥐 모티브를 빗대어 부르는 팬덤 별명. 산해경의 연금술사 사야와 쥐의 모습에 연결된다.",
+    "answer": true,
+    "sources": [
+      "bluemantle-memes"
+    ]
+  },
+  {
+    "id": "meme-2c5c585bcf0cd159",
+    "label": "호시노 아저씨",
+    "category": "meme",
+    "aliases": [
+      "Ojisan",
+      "아저씨",
+      "오지상"
+    ],
+    "description": "자신을 아저씨라고 부르는 호시노의 말투를 따라 하는 표현. 아비도스 대책위원회의 호시노, 우헤와 느긋한 태도에 연결된다.",
+    "answer": true,
+    "sources": [
+      "bluemantle-memes"
+    ]
+  },
+  {
+    "id": "meme-415bc7a907a9b616",
+    "label": "찌그러진 수시노",
+    "category": "meme",
+    "aliases": [
+      "찌그러진 수영복 호시노"
+    ],
+    "description": "수영복 호시노를 납작하거나 찌그러진 모습으로 그린 팬 그림과 리믹스. 호시노(수영복)의 여름 휴가와 느긋한 목소리에 연결된다.",
+    "answer": true,
+    "sources": [
+      "bluemantle-memes"
+    ]
+  },
+  {
+    "id": "meme-49836b6ff83f7a35",
+    "label": "몰?루",
+    "category": "meme",
+    "aliases": [
+      "모루",
+      "몰?루!",
+      "몰루"
+    ],
+    "description": "아로나의 어리둥절한 표정으로 모른다는 반응을 표현하는 말. 몰루콘과 아!루 이모티콘에 연결된다.",
+    "answer": true,
+    "sources": [
+      "bluemantle-memes"
+    ]
+  },
+  {
+    "id": "meme-5504d934b322dc06",
+    "label": "오마이갓또",
+    "category": "meme",
+    "aliases": [
+      "Oh My Gotto",
+      "오마이갓토"
+    ],
+    "description": "모모이와 아리스의 작은 캐릭터 그림이 놀라는 말을 한 뒤 노래에 맞춰 춤추는 팬 영상 형식.",
+    "answer": true,
+    "sources": [
+      "bluemantle-memes"
+    ]
+  },
+  {
+    "id": "meme-5e3b65f18ff9975f",
+    "label": "우헤",
+    "category": "meme",
+    "aliases": [
+      "Uhe",
+      "우헤~",
+      "우헤헤"
+    ],
+    "description": "호시노의 느긋하고 늘어지는 웃음소리를 흉내 내는 표현. 낮잠을 좋아하는 아비도스 호시노와 아저씨 말투에 연결된다.",
+    "answer": true,
+    "sources": [
+      "bluemantle-memes"
+    ]
+  },
+  {
+    "id": "meme-717c60678b9462b7",
+    "label": "아리스 댄스",
+    "category": "meme",
+    "aliases": [
+      "Alice Dance",
+      "Aris Dance",
+      "Arisu Dance",
+      "아리스 춤"
+    ],
+    "description": "작게 그린 아리스가 Usagi Flap 음악에 맞춰 춤추는 반복 애니메이션. 게임개발부 아리스의 팬 영상과 리믹스에 연결된다.",
+    "answer": true,
+    "sources": [
+      "bluemantle-memes"
+    ]
+  },
+  {
+    "id": "meme-85fc55a6921a0f78",
+    "label": "고릴라",
+    "category": "meme",
+    "aliases": [
+      "미카 고릴라"
+    ],
+    "description": "미카의 강한 힘과 전투력을 동물에 빗대는 팬덤 별명. 트리니티 티파티의 미카와 에덴조약 이야기에 연결된다.",
+    "answer": true,
+    "sources": [
+      "bluemantle-memes"
+    ]
+  },
+  {
+    "id": "meme-9532906849fce3ea",
+    "label": "빵빠밤",
+    "category": "meme",
+    "aliases": [
+      "Pan Paka Pan",
+      "Panpakapan",
+      "빰빠밤",
+      "팡파카팡"
+    ],
+    "description": "아리스가 게임 속 용사처럼 레벨이 올랐을 때 내는 축하 효과음. 게임개발부, 용사와 레벨 업에 연결된다.",
+    "answer": true,
+    "sources": [
+      "bluemantle-memes"
+    ]
+  },
+  {
+    "id": "meme-9a39e5d3cfe52ab5",
+    "label": "몰루콘",
+    "category": "meme",
+    "aliases": [
+      "몰?루콘"
+    ],
+    "description": "아로나 등 등장인물을 간단한 그림으로 표현한 이모티콘. 몰?루처럼 짧은 말과 표정으로 대화에 반응한다.",
+    "answer": true,
+    "sources": [
+      "bluemantle-memes"
+    ]
+  },
+  {
+    "id": "meme-9c128c5fa82db13c",
+    "label": "은행을 털자",
+    "category": "meme",
+    "aliases": [
+      "은행 강도",
+      "은행을 털자!",
+      "은행을털자!",
+      "은행털이"
+    ],
+    "description": "시로코가 은행을 털자는 제안을 하는 장면을 빗대는 표현. 아비도스 대책위원회, 복면과 블랙마켓에 연결된다.",
+    "answer": true,
+    "sources": [
+      "bluemantle-memes"
+    ]
+  },
+  {
+    "id": "meme-ca5637ccda654eac",
+    "label": "아!루",
+    "category": "meme",
+    "aliases": [
+      "아!루!"
+    ],
+    "description": "아루의 놀라거나 깨닫는 표정으로 반응을 표현하는 말. 흥신소 68의 아루와 몰?루 이모티콘에 연결된다.",
+    "answer": true,
+    "sources": [
+      "bluemantle-memes"
+    ]
+  },
+  {
+    "id": "meme-e22085a1685435f3",
+    "label": "마따끄",
+    "category": "meme",
+    "aliases": [
+      "Matakku",
+      "마따끄!",
+      "마따쿠"
+    ],
+    "description": "정말이지 하고 투덜거리는 일본어 말투를 흉내 내는 표현. 아즈사 같은 학생의 못마땅한 표정을 그리는 팬 그림에 쓰인다.",
+    "answer": true,
+    "sources": [
+      "bluemantle-memes"
+    ]
+  },
+  {
+    "id": "meme-fbec0fb33c57f017",
+    "label": "이즈나콩",
+    "category": "meme",
+    "aliases": [
+      "이즈나콩콩"
+    ],
+    "description": "이즈나의 귀여운 움직임과 목소리를 반복해서 보여주는 팬 영상과 리믹스. 백귀야행의 닌자 이즈나와 닌자술에 연결된다.",
+    "answer": true,
+    "sources": [
+      "bluemantle-memes"
+    ]
+  },
+  {
+    "id": "music-42668a5cd60672d8",
+    "label": "Unwelcome School",
+    "category": "music",
+    "aliases": [
+      "그 브금",
+      "언웰컴 스쿨",
+      "언웰컴스쿨"
+    ],
+    "description": "아루와 흥신소 68의 소동을 떠올리게 하는 Mitsukiyo의 음악. 시로코의 은행 털이 장면 등 웃긴 상황을 편집한 영상에 쓰인다.",
+    "answer": true,
+    "sources": [
+      "bluemantle-memes"
+    ]
+  },
+  {
+    "id": "music-435065ef8ee60c12",
+    "label": "히후미 다이스키",
+    "category": "music",
+    "aliases": [
+      "Hifumi Daisuki"
+    ],
+    "description": "히후미의 테마 음악. 트리니티 보충수업부의 히후미와 페로로를 떠올리게 하는 밝은 곡으로 팬 리믹스에도 쓰인다.",
+    "answer": true,
+    "sources": [
+      "bluemantle-memes"
+    ]
+  },
+  {
+    "id": "music-e7c13f5c9f0541cb",
+    "label": "Usagi Flap",
+    "category": "music",
+    "aliases": [
+      "우사기 플랩",
+      "우사기플랩"
+    ],
+    "description": "래빗 소대의 이야기와 연결되는 경쾌한 음악. 아리스가 춤추는 팬 애니메이션의 배경 음악으로도 쓰인다.",
+    "answer": true,
+    "sources": [
+      "bluemantle-memes"
+    ]
+  },
+  {
     "id": "npc-0743c501047908d3",
     "label": "모모카",
     "category": "npc",

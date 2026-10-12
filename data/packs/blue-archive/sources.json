@@ -38,7 +38,28 @@
     },
     {
       "id": "bluemantle-editorial",
-      "path": "curated.json"
+      "path": "curated.json",
+      "sha256": "227f998a5eb24d4d47ae29752896968b79519e4cb2b0901f07f1fa5966250ae0"
+    },
+    {
+      "id": "bluemantle-memes",
+      "path": "memes.json",
+      "sha256": "68d534a6050373c5cc6c7ea93d8b4a31f43a97ab2741db712b15d1b719caa183",
+      "references": {
+        "nexon-emoticons": "https://forum.nexon.com/bluearchive/board_view?bannerBoard=1&thread=2157816",
+        "shrew-nickname": "https://namu.moe/w/%EB%95%83%EC%A5%90",
+        "alice-dance": "https://knowyourmeme.com/memes/alice-dance",
+        "panpakapan": "https://www.reddit.com/r/BlueArchive/comments/174jmt8",
+        "oh-my-gotto": "https://knowyourmeme.com/memes/oh-my-gotto",
+        "hoshino-ojisan": "https://www.reddit.com/r/BlueArchive/comments/11sfng1",
+        "hoshino-uhe": "https://www.reddit.com/r/BlueArchive/comments/1uy8otx/dreaming_ojisan_hoshino_by_me/",
+        "mika-gorilla": "https://www.reddit.com/r/BlueArchive/comments/156q3de",
+        "shiroko-bank": "https://www.youtube.com/watch?v=G3aXH_IVJ-o",
+        "fan-remixes": "https://gall.dcinside.com/mgallery/board/view/?id=projectmx&no=4548087",
+        "azusa-fan-project": "https://tumblbug.com/azusa/community/review",
+        "hifumi-theme": "https://zdnet.co.kr/view/?no=20241123203539",
+        "unwelcome-school": "https://www.youtube.com/watch?v=eMqWJDP28p8"
+      }
     }
   ]
 }
