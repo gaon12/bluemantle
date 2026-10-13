@@ -18,6 +18,8 @@ npm run preview:static -- --base=/bluemantle/
 
 정적 버전에서는 용어·벡터와 정답 계산 방식이 공개됩니다. 개인 플레이용으로 설계되어 있으며 서버가 기록을 인증하지 않습니다. 기존 Node 서버 실행도 계속 사용할 수 있습니다.
 
+GitHub 저장소의 **Settings → Pages → Source를 GitHub Actions**로 설정하면 `.github/workflows/pages.yml`이 `main` 푸시마다 테스트·팩 검증·정적 빌드 후 자동 배포합니다. 경로는 Pages 설정에서 자동으로 읽습니다. 사전을 변경한 경우에는 임베딩 생성 결과까지 커밋·푸시하면 배포에 반영됩니다. GitHub Pages를 지원하는 저장소 공개 범위와 요금제가 필요합니다.
+
 ## 바로 실행
 
 Node.js 22.12 이상을 사용합니다. 완성된 임베딩이 포함되어 있으므로 플레이할 때 Python이나 모델 실행은 필요하지 않습니다.
