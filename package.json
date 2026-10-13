@@ -9,6 +9,8 @@
     "start": "npm run build && node src/server.mjs",
     "dev": "node scripts/dev.mjs",
     "build": "vite build",
+    "build:static": "node scripts/build-static.mjs",
+    "preview:static": "vite preview --host 127.0.0.1 --port 4173 --strictPort",
     "test": "node --test test/*.test.mjs",
     "test:data": "node scripts/run-python.mjs -m unittest discover -s tests_python -v",
     "validate": "node scripts/validate-packs.mjs",

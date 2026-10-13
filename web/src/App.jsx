@@ -64,14 +64,14 @@ export default function App() {
   async function submit(event) { event.preventDefault(); if (await gameStore.submit(guess)) setGuess(''); input.current?.focus(); }
   function changeMode(next) { if (!busy && pack && mode !== next) gameStore.begin(pack.id, next); }
   async function share() {
-    try { await navigator.clipboard.writeText(gameStore.shareText(location.origin)); gameStore.message('정답을 숨긴 결과를 복사했어요.', 'success'); }
+    try { await navigator.clipboard.writeText(gameStore.shareText(new URL(import.meta.env.BASE_URL, location.origin).href)); gameStore.message('정답을 숨긴 결과를 복사했어요.', 'success'); }
     catch { gameStore.message('이 브라우저에서는 결과를 복사할 수 없어요.', 'error'); }
   }
 
   return <div className="app-shell" style={{ '--pack-accent': pack?.accent ?? '#00a8e8' }}>
     <SkyScene />
     <header className="top-hud">
-      <a className="brand" href="/" aria-label="Bluemantle 처음으로"><HaloMark /><div><strong>Blue<span>mantle</span><span className="brand-cross">✦</span></strong><small>WORDS CONNECT US.</small></div></a>
+      <a className="brand" href={import.meta.env.BASE_URL} aria-label="Bluemantle 처음으로"><HaloMark /><div><strong>Blue<span>mantle</span><span className="brand-cross">✦</span></strong><small>WORDS CONNECT US.</small></div></a>
       <div className="hud-items"><div className="hud-chip vocabulary-chip"><span className="hud-icon"><Icon name="layers" size={19} /></span><div><small>등록된 용어</small><strong>{pack ? pack.termCount.toLocaleString('ko-KR') : '—'}</strong></div></div><div className="hud-chip countdown-chip"><span className="hud-icon"><Icon name="clock" size={19} /></span><div><small>{mode === 'daily' ? '다음 문제까지' : '연습 모드'}</small><strong>{state.countdown}</strong></div></div><button className="help-button" type="button" onClick={() => setHelpOpen(true)} aria-label="게임 방법"><Icon name="help" size={22} /></button></div>
     </header>
     <main className="workspace">

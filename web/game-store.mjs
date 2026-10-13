@@ -1,6 +1,8 @@
 import { connectionIds } from './connection-map.mjs';
+import { browserRequest } from './browser-client.mjs';
 
 export async function request(route, data) {
+  if (import.meta.env?.VITE_STATIC_GAME === 'true') return browserRequest(route, data);
   let response;
   try { response = await fetch(route, { ...(data === undefined ? {} : { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) }), signal: AbortSignal.timeout(15000) }); }
   catch { throw Object.assign(new Error('서버에 연결하지 못했어요. 잠시 후 다시 시도해 주세요.'), { code: 'NETWORK_ERROR' }); }
@@ -18,7 +20,7 @@ export const isFinished = state => state.gaveUp || state.guesses.some(guess => g
 export class GameStore {
   constructor(client = request, storage = browserStorage, clock = () => Date.now()) {
     this.client = client; this.storage = storage; this.clock = clock; this.listeners = new Set(); this.revision = 0;
-    this.state = { packs: [], game: null, guesses: [], connections: null, connectionsError: false, gaveUp: false, answer: null, busy: true, status: '샬레 네트워크에 연결하고 있어요.', statusKind: '', expired: false, countdown: '—', sort: 'rank', offset: 0, fatal: false };
+    this.state = { packs: [], game: null, guesses: [], connections: null, connectionsError: false, gaveUp: false, answer: null, busy: true, status: '게임 데이터를 불러오고 있어요.', statusKind: '', expired: false, countdown: '—', sort: 'rank', offset: 0, fatal: false };
   }
   getSnapshot = () => this.state;
   subscribe = listener => { this.listeners.add(listener); return () => this.listeners.delete(listener); };
