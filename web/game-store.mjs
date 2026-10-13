@@ -20,6 +20,7 @@ export const isFinished = state => state.gaveUp || state.guesses.some(guess => g
 export class GameStore {
   constructor(client = request, storage = browserStorage, clock = () => Date.now()) {
     this.client = client; this.storage = storage; this.clock = clock; this.listeners = new Set(); this.revision = 0;
+    this.dayTransition = null; this.nextDayRetryAt = 0; this.dayRetryDelay = 5000;
     this.state = { packs: [], game: null, guesses: [], connections: null, connectionsError: false, gaveUp: false, answer: null, busy: true, status: '게임 데이터를 불러오고 있어요.', statusKind: '', expired: false, countdown: '—', sort: 'rank', offset: 0, fatal: false };
   }
   getSnapshot = () => this.state;
@@ -69,7 +70,7 @@ export class GameStore {
       this.save(); this.tick();
       await this.loadConnections();
     } catch (error) { if (revision === this.revision) this.update({ fatal: !this.state.game, status: error.message, statusKind: 'error' }); }
-    finally { if (revision === this.revision) this.update({ busy: false }); }
+    finally { if (revision === this.revision) { this.update({ busy: false }); this.tick(); } }
   }
   async handleError(error) {
     this.message(error.message, 'error');
@@ -88,35 +89,59 @@ export class GameStore {
       if (revision === this.revision && this.state.guesses === guesses) this.update({ connectionsError: true });
     }
   }
-  async addGuess(result) {
+  async addGuess(result, revision = this.revision) {
+    if (revision !== this.revision || this.state.expired) return false;
     if (this.state.guesses.some(g => g.id === result.id)) { this.message('이미 추측한 단어예요. 다른 연결을 떠올려 보세요.'); return false; }
     this.update({ guesses: [...this.state.guesses, result] }); this.save();
     this.message(result.correct ? `${this.state.guesses.length}번의 추측으로 정답을 찾았어요!` : result.hint ? '더 가까운 단어를 찾았어요. 여기서 연결을 이어가 보세요.' : `${result.word} · ${result.rank.toLocaleString('ko-KR')}위. 다음 연결을 찾아보세요.`, result.correct ? 'success' : '');
-    if (result.correct) this.update({ answer: await this.client('/api/reveal', { token: this.state.game.token }) });
+    if (result.correct) {
+      const answer = await this.client('/api/reveal', { token: this.state.game.token });
+      if (revision !== this.revision || this.state.expired) return false;
+      this.update({ answer });
+    }
     await this.loadConnections();
     return true;
   }
   async submit(word) {
     if (this.state.busy || !this.state.game || isFinished(this.state) || this.state.expired) return false;
     if (!word.trim()) { this.message('단어를 먼저 입력해 주세요.', 'error'); return false; }
+    const revision = this.revision;
     this.update({ busy: true });
-    try { return await this.addGuess(await this.client('/api/guess', { token: this.state.game.token, word: word.trim() })); }
-    catch (error) { await this.handleError(error); return false; }
-    finally { this.update({ busy: false }); }
+    try {
+      const result = await this.client('/api/guess', { token: this.state.game.token, word: word.trim() });
+      if (revision !== this.revision) return false;
+      this.tick();
+      return await this.addGuess(result, revision);
+    }
+    catch (error) { if (revision === this.revision) await this.handleError(error); return false; }
+    finally { if (revision === this.revision) { this.update({ busy: false }); this.tick(); } }
   }
   async hint() {
     if (this.state.busy || !this.state.game || isFinished(this.state) || this.state.expired) return;
+    const revision = this.revision;
     this.update({ busy: true });
-    try { await this.addGuess(await this.client('/api/hint', { token: this.state.game.token, guessedIds: this.state.guesses.map(g => g.id) })); }
-    catch (error) { await this.handleError(error); }
-    finally { this.update({ busy: false }); }
+    try {
+      const result = await this.client('/api/hint', { token: this.state.game.token, guessedIds: this.state.guesses.map(g => g.id) });
+      if (revision !== this.revision) return;
+      this.tick();
+      await this.addGuess(result, revision);
+    }
+    catch (error) { if (revision === this.revision) await this.handleError(error); }
+    finally { if (revision === this.revision) { this.update({ busy: false }); this.tick(); } }
   }
   async reveal() {
     if (this.state.busy || !this.state.game) return;
+    const revision = this.revision;
     this.update({ busy: true });
-    try { this.update({ answer: await this.client('/api/reveal', { token: this.state.game.token }), gaveUp: true }); this.save(); this.message('오늘의 연결을 발견했어요. 다른 문제에도 도전해 보세요.'); }
-    catch (error) { await this.handleError(error); }
-    finally { this.update({ busy: false }); }
+    try {
+      const answer = await this.client('/api/reveal', { token: this.state.game.token });
+      if (revision !== this.revision) return;
+      this.tick();
+      if (this.state.expired) return;
+      this.update({ answer, gaveUp: true }); this.save(); this.message('오늘의 연결을 발견했어요. 다른 문제에도 도전해 보세요.');
+    }
+    catch (error) { if (revision === this.revision) await this.handleError(error); }
+    finally { if (revision === this.revision) { this.update({ busy: false }); this.tick(); } }
   }
   toggleSort() { this.update({ sort: this.state.sort === 'rank' ? 'recent' : 'rank' }); }
   tick() {
@@ -126,7 +151,24 @@ export class GameStore {
     const seconds = Math.max(0, Math.ceil((Date.parse(game.endsAt) - (this.clock() + offset)) / 1000));
     const countdown = [Math.floor(seconds / 3600), Math.floor(seconds / 60) % 60, seconds % 60].map(n => String(n).padStart(2, '0')).join(':');
     if (countdown !== this.state.countdown) this.update({ countdown });
-    if (seconds === 0 && !this.state.expired) this.update({ expired: true, status: '새로운 하루의 문제가 열렸어요. 새 문제를 시작해 주세요.' });
+    if (seconds === 0 && !this.state.expired) this.update({ expired: true, status: '새로운 하루의 문제로 전환하고 있어요.', statusKind: '' });
+    if (this.state.expired) return this.advanceDay();
+  }
+  advanceDay() {
+    const { game, busy } = this.state;
+    if (!game || game.mode !== 'daily' || busy || this.dayTransition || this.clock() < this.nextDayRetryAt) return this.dayTransition;
+    const revision = this.revision + 1;
+    // Keep the previous day's saved record and allow just one transition in flight.
+    this.nextDayRetryAt = this.clock() + this.dayRetryDelay;
+    this.dayTransition = this.begin(game.pack.id, 'daily').finally(() => {
+      this.dayTransition = null;
+      if (revision !== this.revision) return;
+      if (this.state.expired) {
+        this.nextDayRetryAt = this.clock() + this.dayRetryDelay;
+        this.dayRetryDelay = Math.min(this.dayRetryDelay * 2, 60000);
+      } else { this.nextDayRetryAt = 0; this.dayRetryDelay = 5000; }
+    });
+    return this.dayTransition;
   }
   shareText(origin) {
     const { game, guesses, gaveUp } = this.state;

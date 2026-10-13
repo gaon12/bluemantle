@@ -46,14 +46,18 @@ test('initial game request failure keeps a visible retry path', async () => {
   assert.equal(store.getSnapshot().busy, false);
 });
 
-test('client countdown expires exactly at the server midnight, never one second early', async () => {
+test('client switches daily games exactly at midnight, never one second early', async () => {
   let now = Date.parse('2026-10-12T14:59:59.500Z');
-  const store = new GameStore(() => Promise.resolve({ ...game(), serverTime: new Date(now).toISOString() }), memory(), () => now);
+  const store = new GameStore(() => Promise.resolve(now < Date.parse('2026-10-12T15:00:00Z')
+    ? { ...game(), serverTime: new Date(now).toISOString() }
+    : { ...game(), date: '2026-10-13', puzzleId: 'tomorrow', serverTime: new Date(now).toISOString(), endsAt: '2026-10-13T15:00:00Z' }), memory(), () => now);
   await store.begin('topic');
   assert.equal(store.getSnapshot().countdown, '00:00:01');
   assert.equal(store.getSnapshot().expired, false);
-  now = Date.parse('2026-10-12T15:00:00.000Z'); store.tick();
-  assert.equal(store.getSnapshot().expired, true);
+  now = Date.parse('2026-10-12T15:00:00.000Z'); await store.tick();
+  assert.equal(store.getSnapshot().game.date, '2026-10-13');
+  assert.equal(store.getSnapshot().countdown, '24:00:00');
+  assert.equal(store.getSnapshot().expired, false);
 });
 
 test('connection failures keep accepted guesses and can be retried without another attempt', async () => {

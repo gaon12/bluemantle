@@ -59,8 +59,16 @@ export default function App() {
   const disabled = busy || !game || finished || state.expired;
   const best = useMemo(() => guesses.reduce((result, item) => !result || item.rank < result.rank ? item : result, null), [guesses]);
   const mode = game?.mode ?? 'daily';
-  useEffect(() => { gameStore.initialize(); const timer = setInterval(() => gameStore.tick(), 1000); return () => clearInterval(timer); }, []);
-  useEffect(() => { if (pack) document.title = `Bluemantle · ${pack.name}`; setGuess(''); }, [game?.puzzleId]);
+  useEffect(() => {
+    gameStore.initialize();
+    const checkDay = () => gameStore.tick();
+    const resume = () => { if (document.visibilityState === 'visible') checkDay(); };
+    const timer = setInterval(checkDay, 1000);
+    window.addEventListener('focus', checkDay);
+    document.addEventListener('visibilitychange', resume);
+    return () => { clearInterval(timer); window.removeEventListener('focus', checkDay); document.removeEventListener('visibilitychange', resume); };
+  }, []);
+  useEffect(() => { if (pack) document.title = `Bluemantle · ${pack.name}`; setGuess(''); setRevealOpen(false); }, [game?.puzzleId]);
   async function submit(event) { event.preventDefault(); if (await gameStore.submit(guess)) setGuess(''); input.current?.focus(); }
   function changeMode(next) { if (!busy && pack && mode !== next) gameStore.begin(pack.id, next); }
   async function share() {
@@ -92,7 +100,6 @@ export default function App() {
             <form id="guess-form" onSubmit={submit}><label htmlFor="guess">선생님, 어떤 단어가 떠오르나요?</label><div className="guess-input-row"><span className="input-icon"><Icon name="spark" size={20} /></span><input ref={input} id="guess" value={guess} onChange={event => setGuess(event.target.value)} maxLength={120} placeholder="떠오르는 단어를 입력하세요" autoComplete="off" spellCheck="false" disabled={disabled} /><button type="submit" className="action-button primary" disabled={disabled}><span>{busy ? '확인 중' : '추측하기'}</span><Icon name="arrow" size={19} /></button></div></form>
             <p className={`status-message ${state.statusKind}`} role="status" aria-live="polite">{state.statusKind === 'success' ? <Icon name="check" size={15} /> : <span className="message-dot" />}{state.status}</p>
             {state.fatal && <button className="action-button secondary" onClick={() => gameStore.initialize()}>다시 연결하기</button>}
-            {state.expired && <button className="action-button primary new-day" onClick={() => gameStore.begin(pack.id, 'daily')} disabled={busy}>오늘의 새 문제 시작하기<Icon name="arrow" size={18} /></button>}
             {answer && <div className="result-panel"><div className="result-top"><Icon name={state.gaveUp ? 'book' : 'check'} size={20} /><span>{state.gaveUp ? 'CONNECTION REVEALED' : 'MISSION COMPLETE'}</span></div><h2>{answer.word}{!state.gaveUp && <span>, 찾았어요!</span>}</h2><p>{answer.description}</p><div className="result-actions"><button className="action-button primary" onClick={share}>결과 공유하기<Icon name="arrow" size={17} /></button><button className="action-button secondary" disabled={busy} onClick={() => gameStore.begin(pack.id, 'practice', true)}>{mode === 'daily' ? '연습 문제 풀기' : '다른 문제 풀기'}</button></div></div>}
             {guesses.length === 0 && !finished && pack?.examples.length > 0 && <div className="starter-words"><span>이런 단어로 시작해 보세요</span>{pack.examples.map(word => <button key={word} type="button" disabled={disabled} onClick={() => { setGuess(word); input.current?.focus(); }}>{word}<span>+</span></button>)}</div>}
             <History guesses={guesses} sort={state.sort} />

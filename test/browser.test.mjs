@@ -71,6 +71,117 @@ test('browser practice games, hints, maps and saved history work without HTTP AP
   assert.notEqual(restarted.state.game.puzzleId, original.puzzleId);
 });
 
+test('midnight automatically replaces a completed daily game once and preserves yesterday’s record', async () => {
+  let now = Date.parse('2026-10-13T14:59:59.999Z'), opens = 0;
+  const service = new BrowserGameService(getPack, () => new Date(now)), storage = memory();
+  const client = (route, body) => { if (route === '/api/games') opens++; return service.request(route, body); };
+  const store = new GameStore(client, storage, () => now);
+  await store.begin(pack.manifest.id);
+  const yesterday = store.state.game;
+  const { puzzle } = await service.resolve(yesterday.token);
+  await store.submit(pack.terms[puzzle.order.at(-1)].label);
+  await store.reveal();
+  const key = `bluemantle:${pack.manifest.id}:daily:${yesterday.puzzleId}`, saved = storage.get(key);
+  await store.tick();
+  assert.equal(opens, 1);
+  assert.equal(store.state.countdown, '00:00:01');
+  now++;
+  const transition = store.tick();
+  store.tick(); store.tick();
+  await transition;
+  assert.equal(opens, 2);
+  assert.equal(store.state.game.date, '2026-10-14');
+  assert.notEqual(store.state.game.puzzleId, yesterday.puzzleId);
+  assert.equal(store.state.countdown, '24:00:00');
+  assert.equal(store.state.busy, false);
+  assert.equal(store.state.expired, false);
+  assert.equal(store.state.gaveUp, false);
+  assert.equal(store.state.answer, null);
+  assert.equal(store.state.connections, null);
+  assert.deepEqual(store.state.guesses, []);
+  assert.deepEqual(storage.get(key), saved);
+});
+
+test('resuming after several days opens today while practice games keep their puzzle and history', async () => {
+  let now = Date.parse('2026-10-13T00:00:00Z');
+  const service = new BrowserGameService(getPack, () => new Date(now));
+  const store = new GameStore((route, body) => service.request(route, body), memory(), () => now);
+  await store.begin(pack.manifest.id);
+  now = Date.parse('2026-10-16T02:00:00Z');
+  await store.tick();
+  assert.equal(store.state.game.date, '2026-10-16');
+  await store.begin(pack.manifest.id, 'practice');
+  await store.submit('빵');
+  const practice = store.state.game, guesses = store.state.guesses;
+  now += 4 * 86400000;
+  await store.tick();
+  assert.equal(store.state.game, practice);
+  assert.equal(store.state.guesses, guesses);
+  assert.equal(store.state.countdown, '제한 없음');
+});
+
+test('a failed midnight request automatically retries without losing history or flooding requests', async () => {
+  let now = Date.parse('2026-10-13T14:59:59.999Z'), offline = false, opens = 0;
+  const service = new BrowserGameService(getPack, () => new Date(now)), storage = memory();
+  const store = new GameStore(async (route, body) => {
+    if (route === '/api/games') { opens++; if (offline) throw new Error('offline'); }
+    return service.request(route, body);
+  }, storage, () => now);
+  await store.begin(pack.manifest.id);
+  await store.submit('빵');
+  const yesterday = store.state.game, guesses = store.state.guesses;
+  offline = true; now++;
+  await store.tick();
+  assert.equal(store.state.game, yesterday);
+  assert.equal(store.state.guesses, guesses);
+  assert.equal(store.state.expired, true);
+  assert.equal(store.state.busy, false);
+  assert.equal(opens, 2);
+  for (let i = 0; i < 4; i++) { now += 1000; await store.tick(); }
+  assert.equal(opens, 2);
+  offline = false; now += 1000;
+  await store.tick();
+  assert.equal(opens, 3);
+  assert.equal(store.state.game.date, '2026-10-14');
+  assert.equal(store.state.expired, false);
+});
+
+test('a guess response crossing midnight cannot enter the next day’s game', async () => {
+  let now = Date.parse('2026-10-13T14:59:59.999Z'), release, ready;
+  const started = new Promise(resolve => { ready = resolve; });
+  const service = new BrowserGameService(getPack, () => new Date(now));
+  const store = new GameStore(async (route, body) => {
+    const result = await service.request(route, body);
+    if (route === '/api/guess') return new Promise(resolve => { release = () => resolve(result); ready(); });
+    return result;
+  }, memory(), () => now);
+  await store.begin(pack.manifest.id);
+  const pending = store.submit('빵');
+  await started;
+  now++;
+  store.tick();
+  assert.equal(store.state.expired, true);
+  release();
+  assert.equal(await pending, false);
+  await store.dayTransition;
+  assert.equal(store.state.game.date, '2026-10-14');
+  assert.deepEqual(store.state.guesses, []);
+  assert.equal(store.state.busy, false);
+});
+
+test('DAY_CHANGED errors trigger automatic rollover before the client’s next timer tick', async () => {
+  let now = Date.parse('2026-10-13T14:59:59.999Z'), remote = now;
+  const service = new BrowserGameService(getPack, () => new Date(remote));
+  const store = new GameStore((route, body) => service.request(route, body), memory(), () => now);
+  await store.begin(pack.manifest.id);
+  remote++;
+  assert.equal(await store.submit('빵'), false);
+  await store.dayTransition;
+  assert.equal(store.state.game.date, '2026-10-14');
+  assert.equal(store.state.expired, false);
+  assert.deepEqual(store.state.guesses, []);
+});
+
 test('browser pack checksums and scores agree with the real server pack', async () => {
   const directory = new URL('../data/packs/blue-archive/', import.meta.url);
   const serverPack = await loadPack(fileURLToPath(directory));
